@@ -1,47 +1,73 @@
-# Rompecabezas Numerico
+# Numeric Puzzle
 from tkinter import *
+import tkinter
 import tkinter as tk
 
 import random
 
-import time
-import tkinter
-
 from datetime import datetime
 
 def main():
-    begin = datetime.now()
     mainWindow = tk.Tk()
-    mainWindow.title('Rompecabezas Numerico')
+    mainWindow.title('Numeric Puzzle')
     mainWindow.config(width = 380, height=380)
     mainWindow.resizable(False, False)
-    
+    def validate_endposition():
+        global positionList
+        correctPos = 0
+        print(positionList)
+        i = 0
+        num = 1
+        while(i < len(positionList)):
+            pos = positionList[i].split(',')
+            x = pos[0]
+            y = pos[1]
+            botonName = mainWindow.nametowidget('boton' + str(num))
+            buttonInfo = botonName.place_info()
+            actualx, actualy = buttonInfo['x'], buttonInfo['y'] 
+            if(actualx == pos[0] and actualy == pos[1]):
+                correctPos += 1
+            else:
+                break
+            i += 1
+        mainWindow.after(500, validate_endposition)
+        return correctPos
+        
     def format_time(seconds):
         hour = int(seconds / 60 / 60)
         seconds -= hour*60*60
         minutes = int(seconds/60)
         seconds -= minutes*60
-        print(f"{minutes:02d}:{seconds:02d}")
         return f"{minutes:02d}:{seconds:02d}"
 
-    def get_time():
-        currentSeconds = (datetime.now() - begin).total_seconds()
-        print(currentSeconds)
-        return format_time(int(currentSeconds))
-
     def refresh_time():
-        actual_time.set(get_time())
+        global begin
+        global actual_time
+        currentSeconds = (datetime.now() - begin).total_seconds()
+        actual_time = format_time(int(currentSeconds))
+        tk.Label(text = 'Time: ' + str(actual_time), font = ('Arial', 15), fg='#7F8C8D').place(x=5, y= 5)
         mainWindow.after(500, refresh_time)
 
     def shuffle_blocks(botonStart, botonScores):
-        refresh_time()
+        # List screen elements position
+        global positionList
+        positionList = ['20,60','110,60','200,60', '290,60','20,140','110,140','200,140', '290,140','20,220','110,220','200,220', '290,220','20,300','110,300','200,300', '290,300']
         botonStart = mainWindow.nametowidget(botonStart)
         botonScores = mainWindow.nametowidget(botonScores)
+        # Delete Score bar/Window Title/Start Button
+        windowTitle.place_forget()
         botonStart.place_forget()
         botonScores.place_forget()
-        # List screen position
-        positionList = ['20,60','110,60','200,60', '290,60','20,140','110,140','200,140', '290,140','20,220','110,220','200,220', '290,220','20,300','110,300','200,300', '290,300']
         newPositionList = [None]*16
+        # Start the time count
+        global begin 
+        global actual_time
+        begin = datetime.now()
+        refresh_time()
+        endGame = validate_endposition()
+        if(endGame == 16):
+            finalTime = actual_time
+            print(endGame, finalTime)
         num = 1
         i = 0	
         # Create list of elements screen position
@@ -75,7 +101,6 @@ def main():
             i+=1
 
     def move_block(clickedButton): 
-        tk.Label(mainWindow, )
         # Get the info of clicked button
         clickedButtonName = mainWindow.nametowidget('boton' + str(clickedButton))
         clickedButtonInfo = clickedButtonName.place_info()
@@ -112,16 +137,14 @@ def main():
                 emptyButtonName.place(x=clickedButtonXPosition, y=clickedButtonYPosition)
                 clickedButtonName.place(x=emptyButtonXPosition, y=emptyButtonYPosition)
     # Inicial position of the buttons
-    actual_time = tk.StringVar(mainWindow, get_time()) 
-    print(actual_time)
+    tk.Button(mainWindow, width=54,height=23, bg='#B2BABB', state='disabled', bd=0).place(x = 0, y = 40)
+    windowTitle = tk.Label(text = 'Numeric Puzzle', font = ('Arial', 15), fg='#7F8C8D')
+    windowTitle.place(x=5, y= 5)
     xpos = 20 
     ypos = 60
     i = 1
     j=1
     numCasillas = 16
-    
-    tk.Label(text='Time: ' + str(actual_time), font=('Arial', 15), fg='#7F8C8D').place(x=5, y= 5)
-    tk.Button(mainWindow, width=54,height=23, bg='#B2BABB', state='disabled', bd=0).place(x = 0, y = 40)
     while(i < numCasillas):
         while(j < 5):
             if(i==16):
@@ -133,10 +156,7 @@ def main():
             j+=1
         xpos = 20
         ypos += 80
-        j = 1
-    def myMainLoop():
-        refresh_time(mainWindow)
-        mainWindow.after(1, myMainLoop)  
+        j = 1 
     tk.Button(mainWindow, text = 'Best Scores:', name= 'botonScores', width=25, height=10, command = shuffle_blocks, anchor=tkinter.N, state='disabled').place(relx=.5, rely=.5, anchor=CENTER)
     tk.Button(mainWindow, text = 'Start the Game!', name= 'botonStart', width=15, height=2, command = lambda botonStart = 'botonStart', botonScores = 'botonScores': shuffle_blocks(botonStart, botonScores)).place(relx=.5, rely=.6,anchor= CENTER)
     mainWindow.mainloop()
