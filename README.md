@@ -1,1 +1,1 @@
-# Numerical-Puzzle
+# Numeric Puzzle
