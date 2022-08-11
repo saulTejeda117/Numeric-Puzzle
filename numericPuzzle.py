@@ -2,6 +2,9 @@
 from tkinter import *
 import tkinter
 import tkinter as tk
+from tkinter import messagebox
+
+import os
 
 import random
 
@@ -12,26 +15,6 @@ def main():
     mainWindow.title('Numeric Puzzle')
     mainWindow.config(width = 380, height=380)
     mainWindow.resizable(False, False)
-    def validate_endposition():
-        global positionList
-        correctPos = 0
-        print(positionList)
-        i = 0
-        num = 1
-        while(i < len(positionList)):
-            pos = positionList[i].split(',')
-            x = pos[0]
-            y = pos[1]
-            botonName = mainWindow.nametowidget('boton' + str(num))
-            buttonInfo = botonName.place_info()
-            actualx, actualy = buttonInfo['x'], buttonInfo['y'] 
-            if(actualx == pos[0] and actualy == pos[1]):
-                correctPos += 1
-            else:
-                break
-            i += 1
-        mainWindow.after(500, validate_endposition)
-        return correctPos
         
     def format_time(seconds):
         hour = int(seconds / 60 / 60)
@@ -47,6 +30,42 @@ def main():
         actual_time = format_time(int(currentSeconds))
         tk.Label(text = 'Time: ' + str(actual_time), font = ('Arial', 15), fg='#7F8C8D').place(x=5, y= 5)
         mainWindow.after(500, refresh_time)
+
+    def validate_endposition():
+        correctPos = 0
+        positionList = ['20,60','110,60','200,60', '290,60','20,140','110,140','200,140', '290,140','20,220','110,220','200,220', '290,220','20,300','110,300','200,300', '290,300'] 
+        i = 0
+        num = 1
+        while(i < len(positionList)):
+            pos = positionList[i].split(',')
+            x = pos[0]
+            y = pos[1]
+            botonName = mainWindow.nametowidget('boton' + str(num))
+            buttonInfo = botonName.place_info()
+            actualx, actualy = buttonInfo['x'], buttonInfo['y'] 
+            if(actualx == pos[0] and actualy == pos[1]):
+                correctPos += 1
+            else:
+                break
+            i += 1
+            num += 1
+        mainWindow.after(500, validate_endposition)
+        if(correctPos>=15):
+            print('EY')
+            fileExists = os.path.exists('RecordsList.txt')
+            if (fileExists == True):
+                with open("RecordsList.txt", "a") as f:
+                    f.write(str(actual_time))
+                winMessage = messagebox.showinfo(message = "You Win!\n", title="Game Over")
+                winMessage.destroy()
+                main()
+            else:
+                with open("RecordsList.txt", "w") as f:
+                    f.write(str(actual_time))
+                winMessage = messagebox.showinfo(message = "You Win!\n", title="Game Over")
+                winMessage.destroy()
+                main()
+
 
     def shuffle_blocks(botonStart, botonScores):
         # List screen elements position
@@ -64,10 +83,6 @@ def main():
         global actual_time
         begin = datetime.now()
         refresh_time()
-        endGame = validate_endposition()
-        if(endGame == 16):
-            finalTime = actual_time
-            print(endGame, finalTime)
         num = 1
         i = 0	
         # Create list of elements screen position
@@ -99,6 +114,7 @@ def main():
             positionList[newPosition] = None 
             num+=1
             i+=1
+        validate_endposition()     
 
     def move_block(clickedButton): 
         # Get the info of clicked button
@@ -157,7 +173,7 @@ def main():
         xpos = 20
         ypos += 80
         j = 1 
-    tk.Button(mainWindow, text = 'Best Scores:', name= 'botonScores', width=25, height=10, command = shuffle_blocks, anchor=tkinter.N, state='disabled').place(relx=.5, rely=.5, anchor=CENTER)
+    tk.Button(mainWindow, text = 'Best Scores:', name= 'botonScores', width=25, height=10, anchor=tkinter.N, state='disabled').place(relx=.5, rely=.5, anchor=CENTER)
     tk.Button(mainWindow, text = 'Start the Game!', name= 'botonStart', width=15, height=2, command = lambda botonStart = 'botonStart', botonScores = 'botonScores': shuffle_blocks(botonStart, botonScores)).place(relx=.5, rely=.6,anchor= CENTER)
     mainWindow.mainloop()
 main()
